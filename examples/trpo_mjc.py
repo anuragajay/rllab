@@ -8,8 +8,8 @@ env = normalize(PegEnv())
 
 policy = GaussianMLPPolicy(
     env_spec=env.spec,
-    # The neural network policy should have two hidden layers, each with 32 hidden units.
-    hidden_sizes=(32, 32)
+    # The neural network policy should have two hidden layers, each with 42 hidden units.
+    hidden_sizes=(42, 42)
 )
 
 baseline = LinearFeatureBaseline(env_spec=env.spec)
@@ -18,7 +18,7 @@ algo = TRPO(
     env=env,
     policy=policy,
     baseline=baseline,
-    batch_size=20000,
+    batch_size=45000,
     max_path_length=100,
     n_itr=1000,
     discount=0.99,
