@@ -17,7 +17,7 @@ class PegEnv(MujocoEnv, Serializable):
         self.PR2_GAINS = np.array([3.09, 1.08, 0.393, 0.674, 0.111, 0.152, 0.098])
         self.t = 0
         self.T = 100
-        self.init_body_pos = self.model.body_pos[1]
+        self.init_body_pos = self.model.body_pos.copy()
 
     def get_current_obs(self):        
         return np.concatenate([
@@ -46,9 +46,10 @@ class PegEnv(MujocoEnv, Serializable):
         self.model.data.qvel = self.init_qvel
         self.model.data.qacc = self.init_qacc
         self.model.data.ctrl = self.init_ctrl
-        if not hasattr(self, init_body_pos):
-            self.init_body_pos = self.model.body_pos[1]
-        self.model.body_pos[1] = self.init_body_pos + np.array([0.2*np.random.rand()-0.1, 0.2*np.random.rand()-0.1, 0])
+        if hasattr(self, 'init_body_pos'):
+            tmp_body_pos = self.init_body_pos.copy()
+            tmp_body_pos[1] += np.array([0.2*np.random.rand()-0.1, 0.2*np.random.rand()-0.1, 0])
+            self.model.body_pos = tmp_body_pos
         self.t = 0
 
     def cost(self, action):
