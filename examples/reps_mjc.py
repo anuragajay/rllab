@@ -21,7 +21,6 @@ baseline = LinearFeatureBaseline(env_spec=env.spec)
 
 vg = instrument.VariantGenerator()
 vg.add("seed", [1,2,3])
-vg.add("step_size",[0.1])
 
 variants = vg.variants()
 num = eval(sys.argv[1])
@@ -29,14 +28,12 @@ num = eval(sys.argv[1])
 print "#Experiments number:", num
 variant = variants[num]
 
-
 algo = REPS(
     env=env,
     policy=policy,
     baseline=baseline,
     batch_size=90000,
     max_path_length=100,
-    step_size=variant["step_size"],
     n_itr=1000,
     discount=0.99,
     plot=True,
