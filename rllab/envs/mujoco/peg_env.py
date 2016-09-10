@@ -9,7 +9,7 @@ from rllab.misc import logger
 
 class PegEnv(MujocoEnv, Serializable):
 
-    FILE = 'pr2_arm3d.xml'
+    FILE = 'pr2_arm3d_damp.xml'
 
     def __init__(self, *args, **kwargs):
         super(PegEnv, self).__init__(*args, **kwargs)
@@ -62,6 +62,7 @@ class PegEnv(MujocoEnv, Serializable):
         wp = np.array([2, 2, 1, 2, 2, 1])
         
         l1, l2 = 0.1, 10.0
+
         alpha = 1e-5
         wpm = 1
         wp = wp*wpm
@@ -74,6 +75,7 @@ class PegEnv(MujocoEnv, Serializable):
         reward -= l
 
         l1, l2 = 1.0, 0.0
+
         if self.t == self.T:
             wpm = 10.0
         else:
@@ -88,3 +90,26 @@ class PegEnv(MujocoEnv, Serializable):
 
         return reward
 
+    def simple_cost(self, action):
+        reward = 0
+        wu = 5e-3/self.PR2_GAINS
+        cost_action = (wu*(action**2)).sum()
+        reward -= cost_action
+        
+        target = np.array([0.0, 0.3, -0.5, 0.0, 0.3, -0.2])
+        wp = np.array([2, 2, 1, 2, 2, 1])
+        
+        l1, l2 = 1.0, 0.0001
+
+        alpha = 1e-5
+        wpm = 1
+        wp = wp*wpm
+        d = self.model.data.site_xpos.flatten() - target
+        sqrtwp = np.sqrt(wp)
+        dsclsq = d * sqrtwp
+        dscl = d * wp
+        l = 0.5 * np.sum(dsclsq ** 2) * l2 + \
+                0.5 * np.sqrt(alpha + np.sum(dscl ** 2)) * l1
+        reward -= l
+
+        return reward
