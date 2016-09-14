@@ -20,38 +20,33 @@ policy = GaussianMLPPolicy(
 baseline = LinearFeatureBaseline(env_spec=env.spec)
 
 vg = instrument.VariantGenerator()
-vg.add("seed", [1,2,3])
-vg.add("step_size",[0.1])
+vg.add("seed", range(3))
 
 variants = vg.variants()
-num = eval(sys.argv[1])
 
-print "#Experiments number:", num
-variant = variants[num]
+for variant in [variants[2]]:
+    algo = ERWR(
+        env=env,
+        policy=policy,
+        baseline=baseline,
+        batch_size=45000,
+        max_path_length=100,
+        step_size=0.01,
+        n_itr=1000,
+        discount=0.99,
+        exp_prefix="rwr-peg-search",
+        exp_name="seed_{0}".format(variant["seed"]),
+    )
 
-
-algo = ERWR(
-    env=env,
-    policy=policy,
-    baseline=baseline,
-    batch_size=90000,
-    max_path_length=100,
-    step_size=variant["step_size"],
-    n_itr=1000,
-    discount=0.99,
-    plot=True,
-)
-
-run_experiment_lite(
-    algo.train(),
-    # Number of parallel workers for sampling
-    n_parallel=8,
-    plot=True,
-    # Only keep the snapshot parameters for the last iteration
-    snapshot_mode="last",
-    # Specifies the seed for the experiment. If this is not provided, a random seed
-    # will be used,
-    seed=variant["seed"],
-    exp_prefix="rwr_peg_search",
-    exp_name="seed_{0}".format(variant["seed"]),
-)
+    run_experiment_lite(
+        algo.train(),
+        # Number of parallel workers for sampling
+        n_parallel=8,
+        # Only keep the snapshot parameters for the last iteration
+        snapshot_mode="last",
+        # Specifies the seed for the experiment. If this is not provided, a random seed
+        # will be used,
+        seed=variant["seed"],
+        exp_prefix="rwr_peg_search",
+        exp_name="seed_{0}".format(variant["seed"]),
+    )

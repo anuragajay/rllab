@@ -48,7 +48,7 @@ class PegEnv(MujocoEnv, Serializable):
         self.model.data.ctrl = self.init_ctrl
         if hasattr(self, 'init_body_pos'):
             tmp_body_pos = self.init_body_pos.copy()
-            tmp_body_pos[1] += np.array([0.2*np.random.rand()-0.1, 0.2*np.random.rand()-0.1, 0])
+            tmp_body_pos[1] += np.array([0.4*np.random.rand()-0.25, 0.4*np.random.rand()-0.25, 0.0])
             self.model.body_pos = tmp_body_pos
         self.t = 0
 

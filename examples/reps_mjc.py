@@ -20,35 +20,34 @@ policy = GaussianMLPPolicy(
 baseline = LinearFeatureBaseline(env_spec=env.spec)
 
 vg = instrument.VariantGenerator()
-vg.add("seed", [1,2,3])
+vg.add("seed", range(3))
 
 variants = vg.variants()
-num = eval(sys.argv[1])
 
-print "#Experiments number:", num
-variant = variants[num]
+for variant in variants:
+    algo = REPS(
+        env=env,
+        policy=policy,
+        baseline=baseline,
+        batch_size=20000,
+        max_path_length=100,
+        n_itr=1000,
+        discount=0.99,
+        plot=True,
+        exp_prefix="reps-peg3D-search",
+        exp_name="seed_{0}".format(variant["seed"]),
+    )
 
-algo = REPS(
-    env=env,
-    policy=policy,
-    baseline=baseline,
-    batch_size=90000,
-    max_path_length=100,
-    n_itr=1000,
-    discount=0.99,
-    plot=True,
-)
-
-run_experiment_lite(
-    algo.train(),
-    # Number of parallel workers for sampling
-    n_parallel=8,
-    plot=True,
-    # Only keep the snapshot parameters for the last iteration
-    snapshot_mode="last",
-    # Specifies the seed for the experiment. If this is not provided, a random seed
-    # will be used,
-    seed=variant["seed"],
-    exp_prefix="reps_peg_search",
-    exp_name="seed_{0}".format(variant["seed"]),
-)
+    run_experiment_lite(
+        algo.train(),
+        # Number of parallel workers for sampling
+        n_parallel=8,
+        plot=True,
+        # Only keep the snapshot parameters for the last iteration
+        snapshot_mode="last",
+        # Specifies the seed for the experiment. If this is not provided, a random seed
+        # will be used,
+        seed=variant["seed"],
+        exp_prefix="reps_peg3D_search",
+        exp_name="seed_{0}".format(variant["seed"]),
+    )

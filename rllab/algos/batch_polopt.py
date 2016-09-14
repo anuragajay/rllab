@@ -8,7 +8,7 @@ from rllab.algos import util
 import rllab.misc.logger as logger
 import rllab.plotter as plotter
 from rllab.policies.base import Policy
-
+import cPickle
 
 class BatchSampler(Sampler):
     def __init__(self, algo):
@@ -190,6 +190,8 @@ class BatchPolopt(RLAlgorithm):
             whole_paths=True,
             sampler_cls=None,
             sampler_args=None,
+            exp_prefix=None,
+            exp_name=None,
             **kwargs
     ):
         """
@@ -213,6 +215,8 @@ class BatchPolopt(RLAlgorithm):
         :param store_paths: Whether to save all paths data to the snapshot.
         """
         self.env = env
+        self.exp_prefix = exp_prefix
+        self.exp_name = exp_name
         self.policy = policy
         self.baseline = baseline
         self.scope = scope
@@ -249,6 +253,12 @@ class BatchPolopt(RLAlgorithm):
             with logger.prefix('itr #%d | ' % itr):
                 paths = self.sampler.obtain_samples(itr)
                 samples_data = self.sampler.process_samples(itr, paths)
+                if self.exp_name:
+                    num_traj = len(samples_data["paths"])
+                    final_eepts = np.concatenate([samples_data["paths"][traj]["observations"][-1,14:20][None,:]\
+                        for traj in range(num_traj)], axis=0)
+                    cPickle.dump( final_eepts, open( "/home/ajay/rllab/data/local/{0}/{1}/final_eepts_itr_{2}.pkl".format(\
+                        self.exp_prefix, self.exp_name, itr), "w+" ) )
                 self.log_diagnostics(paths)
                 self.optimize_policy(itr, samples_data)
                 logger.log("saving snapshot...")

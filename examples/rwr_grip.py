@@ -20,38 +20,33 @@ policy = GaussianMLPPolicy(
 baseline = LinearFeatureBaseline(env_spec=env.spec)
 
 vg = instrument.VariantGenerator()
-vg.add("seed", [1,2,3])
-vg.add("step_size",[0.1])
+vg.add("seed", [1,2,3,4,5])
 
 variants = vg.variants()
-num = eval(sys.argv[1])
 
-print "#Experiments number:", num
-variant = variants[num]
+for variant in variants:
+    algo = ERWR(
+        env=env,
+        policy=policy,
+        baseline=baseline,
+        batch_size=90000,
+        max_path_length=100,
+        step_size=0.1,
+        n_itr=1000,
+        discount=0.99,
+        plot=True,
+    )
 
-
-algo = ERWR(
-    env=env,
-    policy=policy,
-    baseline=baseline,
-    batch_size=90000,
-    max_path_length=100,
-    step_size=variant["step_size"],
-    n_itr=1000,
-    discount=0.99,
-    plot=True,
-)
-
-run_experiment_lite(
-    algo.train(),
-    # Number of parallel workers for sampling
-    n_parallel=8,
-    plot=True,
-    # Only keep the snapshot parameters for the last iteration
-    snapshot_mode="last",
-    # Specifies the seed for the experiment. If this is not provided, a random seed
-    # will be used,
-    seed=variant["seed"],
-    exp_prefix="rwr_grip_search",
-    exp_name="seed_{0}".format(variant["seed"]),
-)
+    run_experiment_lite(
+        algo.train(),
+        # Number of parallel workers for sampling
+        n_parallel=4,
+        plot=True,
+        # Only keep the snapshot parameters for the last iteration
+        snapshot_mode="last",
+        # Specifies the seed for the experiment. If this is not provided, a random seed
+        # will be used,
+        seed=variant["seed"],
+        exp_prefix="rwr_grip_search",
+        exp_name="seed_{0}".format(variant["seed"]),
+    )
