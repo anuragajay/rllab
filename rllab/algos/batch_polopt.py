@@ -47,6 +47,13 @@ class BatchSampler(Sampler):
                      path_baselines[:-1]
             path["advantages"] = special.discount_cumsum(
                 deltas, self.algo.discount * self.algo.gae_lambda)
+
+            path["advantages"] = np.exp(0.1*path["advantages"][0])*np.ones_like(path["advantages"])
+            # path["advantages"] = path["advantages"][0]*np.ones_like(path["advantages"])
+            
+            # path['advantages'] = np.exp(path['advantages'])
+            # path['advantages'] /= np.sum(path['advantages'])
+
             path["returns"] = special.discount_cumsum(path["rewards"], self.algo.discount)
             baselines.append(path_baselines[:-1])
             returns.append(path["returns"])
